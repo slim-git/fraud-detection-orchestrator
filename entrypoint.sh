@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # Charger les variables d'environnement
 if [ -f .env ]; then
@@ -6,7 +7,7 @@ if [ -f .env ]; then
 fi
 
 # Init DB si besoin
-airflow db upgrade
+airflow db init
 
 # Créer un user admin si aucun n'existe
 airflow users create \
