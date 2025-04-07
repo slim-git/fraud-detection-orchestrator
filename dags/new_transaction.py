@@ -1,9 +1,16 @@
+import os
 import logging
 import requests
 from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.decorators import task
 import json
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
+FASTAPI_API_KEY = os.getenv("FASTAPI_API_KEY")
 
 default_args = {
     "owner": "airflow",
@@ -75,10 +82,10 @@ def _push_transaction(ti):
 
     api_response = requests.post(
         url='https://slimg-fraud-detection-service-api.hf.space/transaction/process',
-        params=data,
+        data=json.dumps(data),
         headers={
             'Content-Type': 'application/json',
-            'Authorization': 'je_suis_une_clef_d_api',
+            'Authorization': FASTAPI_API_KEY
         },
     )
 
