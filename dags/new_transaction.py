@@ -1,22 +1,16 @@
 import os
 import logging
 import requests
-from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.decorators import task
 import json
 from dotenv import load_dotenv
+from common import check_db_connection, default_args
 
 # Load environment variables from .env file
 load_dotenv()
 
 FASTAPI_API_KEY = os.getenv("FASTAPI_API_KEY")
-
-default_args = {
-    "owner": "airflow",
-    "start_date": datetime.now() - timedelta(minutes=5),
-    "catchup": False
-}
 
 @task(task_id="pull_transaction")
 def _pull_transaction(ti):
@@ -103,7 +97,8 @@ with DAG(dag_id="process_new_transaction",
     """
     DAG to fetch a new transaction and call the fraud detection pipeline
     """
+    check_db = check_db_connection()
     pull = _pull_transaction()
     push = _push_transaction()
     
-    pull >> push
+    check_db >> pull >> push
