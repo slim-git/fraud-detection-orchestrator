@@ -15,7 +15,7 @@ def _refresh_views():
         session.commit()
 
 # Copy default_args from the original code
-dag_args = {**default_args}
+dag_args = default_args.copy()
 dag_args['start_date'] = datetime.now() - timedelta(days=1),
 
 with DAG(dag_id="refresh_materialized_views",

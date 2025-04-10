@@ -93,7 +93,7 @@ def _push_transaction(ti):
     logging.info(f"Fraud detection response: {data}")
 
 # Copy default_args from the original code
-dag_args = {**default_args}
+dag_args = default_args.copy()
 dag_args['start_date'] = datetime.now() - timedelta(minutes=2),
 
 with DAG(dag_id="process_new_transaction",
