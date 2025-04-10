@@ -1,6 +1,7 @@
 from airflow import DAG
 from airflow.decorators import task
 from common import check_db_connection, get_session, default_args
+from datetime import datetime, timedelta
 
 @task(task_id="refresh_views")
 def _refresh_views():
@@ -12,9 +13,13 @@ def _refresh_views():
     with next(get_session()) as session:
         session.execute("REFRESH MATERIALIZED VIEW CONCURRENTLY public.frauds_m_view WITH DATA;")
         session.commit()
-    
+
+# Copy default_args from the original code
+dag_args = {**default_args}
+dag_args['start_date'] = datetime.now() - timedelta(day=1),
+
 with DAG(dag_id="refresh_materialized_views",
-         default_args=default_args,
+         default_args=dag_args,
          schedule_interval="0 3 */1 * *") as dag:
     """
     DAG to refresh the materialized views in the database.
