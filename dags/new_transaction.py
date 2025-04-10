@@ -6,6 +6,7 @@ from airflow.decorators import task
 import json
 from dotenv import load_dotenv
 from common import check_db_connection, default_args
+from datetime import datetime, timedelta
 
 # Load environment variables from .env file
 load_dotenv()
@@ -91,9 +92,13 @@ def _push_transaction(ti):
 
     logging.info(f"Fraud detection response: {data}")
 
+# Copy default_args from the original code
+dag_args = {**default_args}
+dag_args['start_date'] = datetime.now() - timedelta(minute=2),
+
 with DAG(dag_id="process_new_transaction",
-         default_args=default_args,
-         schedule_interval="*/5 * * * *") as dag:
+         default_args=dag_args,
+         schedule_interval="*/1 * * * *") as dag:
     """
     DAG to fetch a new transaction and call the fraud detection pipeline
     """
