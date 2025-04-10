@@ -94,7 +94,7 @@ def _push_transaction(ti):
 
 # Copy default_args from the original code
 dag_args = {**default_args}
-dag_args['start_date'] = datetime.now() - timedelta(minute=2),
+dag_args['start_date'] = datetime.now() - timedelta(minutes=2),
 
 with DAG(dag_id="process_new_transaction",
          default_args=dag_args,

@@ -16,7 +16,7 @@ def _refresh_views():
 
 # Copy default_args from the original code
 dag_args = {**default_args}
-dag_args['start_date'] = datetime.now() - timedelta(day=1),
+dag_args['start_date'] = datetime.now() - timedelta(days=1),
 
 with DAG(dag_id="refresh_materialized_views",
          default_args=dag_args,
