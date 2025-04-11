@@ -2,7 +2,7 @@ import logging
 from airflow.decorators import task
 import os
 from dotenv import load_dotenv
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime, timedelta
 from typing import Generator
@@ -37,7 +37,7 @@ def check_db_connection():
     """
     try:
         with next(get_session()) as session:
-            session.execute("SELECT 1")
+            session.execute(text("SELECT 1"))
             logging.info("Database connection is successful.")
     except Exception as e:
         logging.error(f"Database connection failed: {e}")
