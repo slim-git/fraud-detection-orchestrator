@@ -7,6 +7,8 @@ import json
 from dotenv import load_dotenv
 from common import check_db_connection, default_args
 from datetime import datetime, timedelta
+from airflow.utils.task_group import TaskGroup
+from airflow.operators.bash import BashOperator
 
 # Load environment variables from .env file
 load_dotenv()
@@ -104,7 +106,15 @@ with DAG(dag_id="process_new_transaction",
     DAG to fetch a new transaction and call the fraud detection pipeline
     """
     check_db = check_db_connection()
-    pull = _pull_transaction()
-    push = _push_transaction()
+
+    with TaskGroup(group_id='transactions') as all_tasks:
+        for i in range(1, 4):
+            with TaskGroup(group_id=f'transaction_{i}') as transaction_group:
+                pull = _pull_transaction()
+                push = _push_transaction()
+                
+                pull >> push
+
+    end_dag = BashOperator(task_id="end_dag", bash_command="echo 'End!'")
     
-    check_db >> pull >> push
+    check_db >> all_tasks >> end_dag
