@@ -16,7 +16,7 @@ load_dotenv()
 FASTAPI_API_KEY = os.getenv("FASTAPI_API_KEY")
 
 @task(task_id="pull_transaction")
-def _pull_transaction(ti):
+def _pull_transaction(ti, prefix: str = ''):
     """
     Pulls a new transaction from the fraud detection service and pushes it to XCom.
     """
@@ -32,12 +32,12 @@ def _pull_transaction(ti):
     transaction_dict = {key: value for key, value in zip(data['columns'], data['data'][0])}
 
     # Push the transaction dictionary to XCom
-    ti.xcom_push(key="transaction_dict", value=transaction_dict)
+    ti.xcom_push(key=f"{prefix}_transaction_dict", value=transaction_dict)
     
     logging.info(f"Fetched data: {transaction_dict}")
 
 @task(task_id="push_transaction")
-def _push_transaction(ti):
+def _push_transaction(ti, prefix: str = ''):
     """
     Pushes the transaction data to the fraud detection pipeline.
     This function is called after pulling the transaction data.
@@ -68,7 +68,7 @@ def _push_transaction(ti):
     }
 
     # Pull the transaction dictionary from XCom
-    transaction_dict = ti.xcom_pull(task_ids="pull_transaction", key="transaction_dict")
+    transaction_dict = ti.xcom_pull(task_ids="pull_transaction", key=f"{prefix}_transaction_dict")
 
     # Check if the transaction dictionary is empty
     if not transaction_dict:
@@ -109,9 +109,10 @@ with DAG(dag_id="process_new_transaction",
 
     with TaskGroup(group_id='transactions') as all_tasks:
         for i in range(1, 4):
-            with TaskGroup(group_id=f'transaction_{i}') as transaction_group:
-                pull = _pull_transaction()
-                push = _push_transaction()
+            group = f'transaction_{i}'
+            with TaskGroup(group_id=group) as transaction_group:
+                pull = _pull_transaction(prefix=group)
+                push = _push_transaction(prefix=group)
                 
                 pull >> push
 
