@@ -68,7 +68,7 @@ def _push_transaction(ti, prefix: str = ''):
     }
 
     # Pull the transaction dictionary from XCom
-    transaction_dict = ti.xcom_pull(task_ids="pull_transaction", key=f"{prefix}_transaction_dict")
+    transaction_dict = ti.xcom_pull(f"transactions.{prefix}.pull_transaction", key=f"{prefix}_transaction_dict")
 
     # Check if the transaction dictionary is empty
     if not transaction_dict:
