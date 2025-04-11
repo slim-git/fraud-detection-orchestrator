@@ -46,6 +46,7 @@ def _push_transaction(ti):
         'transaction_amount': 'amt',
         'transaction_timestamp': 'current_time',
         'transaction_category': 'category',
+        'transaction_is_real_fraud': 'is_fraud',
         'customer_credit_card_number': 'cc_num',
         'customer_first_name': 'first',
         'customer_last_name': 'last',
