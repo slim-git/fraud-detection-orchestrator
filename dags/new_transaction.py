@@ -4,6 +4,7 @@ import requests
 from airflow import DAG
 from airflow.decorators import task
 import json
+import time
 from dotenv import load_dotenv
 from common import check_db_connection, default_args
 from datetime import datetime, timedelta
@@ -20,7 +21,17 @@ def _pull_transaction(ti, prefix: str = ''):
     """
     Pulls a new transaction from the fraud detection service and pushes it to XCom.
     """
-    response = requests.get("https://charlestng-real-time-fraud-detection.hf.space/current-transactions")
+    def get_current_transaction():
+        return requests.get("https://charlestng-real-time-fraud-detection.hf.space/current-transactions")
+    
+    response = get_current_transaction()
+
+    # If status code is 429, wait for a few seconds and retry
+    if response.status_code == 429:
+        waiting_time = 15
+        logging.warning(f"Rate limit exceeded. Retrying in {waiting_time} seconds...")
+        time.sleep(waiting_time)
+        response = get_current_transaction()
 
     # Check response status code
     response.raise_for_status()
