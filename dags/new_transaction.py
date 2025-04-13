@@ -10,6 +10,11 @@ from common import check_db_connection, default_args
 from datetime import datetime, timedelta
 from airflow.utils.task_group import TaskGroup
 from airflow.operators.bash import BashOperator
+from http.client import (
+    TOO_MANY_REQUESTS, # 429
+    INTERNAL_SERVER_ERROR # 500
+)
+
 
 # Load environment variables from .env file
 load_dotenv()
@@ -26,8 +31,8 @@ def _pull_transaction(ti, prefix: str = ''):
     
     response = get_current_transaction()
 
-    # If status code is 429, wait for a few seconds and retry
-    if response.status_code == 429:
+    # If status code is 429 or 500, wait for a few seconds and retry
+    if response.status_code in [TOO_MANY_REQUESTS, INTERNAL_SERVER_ERROR]:
         waiting_time = 15
         logging.warning(f"Rate limit exceeded. Retrying in {waiting_time} seconds...")
         time.sleep(waiting_time)
