@@ -101,6 +101,7 @@ dag_args['start_date'] = datetime.now() - timedelta(minutes=2)
 
 with DAG(dag_id="process_new_transaction",
          default_args=dag_args,
+         max_active_runs=1,
          schedule_interval="*/1 * * * *") as dag:
     """
     DAG to fetch a new transaction and call the fraud detection pipeline
