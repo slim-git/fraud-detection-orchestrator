@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     default-libmysqlclient-dev \
     libpq-dev \
+    pgbouncer \
     git \
     curl \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -27,6 +28,11 @@ RUN mkdir -p $AIRFLOW_HOME \
 COPY --chown=airflow:airflow requirements.txt /requirements.txt
 COPY --chown=airflow:airflow dags $AIRFLOW_HOME/dags
 COPY --chown=airflow:airflow entrypoint.sh /entrypoint.sh
+
+# Create the pgbouncer configuration directory
+# and give ownership to airflow user
+RUN mkdir -p /etc/pgbouncer \
+    && chown -R airflow:airflow /etc/pgbouncer
 
 # Make entrypoint executable
 RUN chmod +x /entrypoint.sh
