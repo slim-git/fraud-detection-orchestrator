@@ -2,6 +2,8 @@ from airflow import DAG
 from airflow.decorators import task
 from common import check_db_connection, get_session, default_args
 from datetime import datetime, timedelta
+import logging
+from sqlalchemy import text
 
 @task(task_id="refresh_views")
 def _refresh_views():
@@ -11,8 +13,14 @@ def _refresh_views():
     It executes the SQL command to refresh the materialized view.
     """
     with next(get_session()) as session:
-        session.execute("REFRESH MATERIALIZED VIEW CONCURRENTLY public.frauds_m_view WITH DATA;")
-        session.commit()
+        list_views = session.execute(text("SELECT matviewname FROM pg_matviews WHERE schemaname = 'public';"))
+        
+        for view in list_views:
+            view_name = view[0]
+            logging.info(f"Refreshing materialized view: {view_name}")
+            session.execute(text(f"REFRESH MATERIALIZED VIEW CONCURRENTLY public.{view_name} WITH DATA;"))
+        
+            session.commit()
 
 # Copy default_args from the original code
 dag_args = default_args.copy()
