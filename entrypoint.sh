@@ -9,11 +9,11 @@ fi
 
 # Dynamically extract database connection details from environment variables
 # airflow_db
-AF_USER=$(echo "$AIRFLOW__CORE__SQL_ALCHEMY_CONN" | sed -E 's|postgresql\+psycopg2://([^:]+):.*|\1|')
-AF_PASS=$(echo "$AIRFLOW__CORE__SQL_ALCHEMY_CONN" | sed -E 's|postgresql\+psycopg2://[^:]+:([^@]+)@.*|\1|')
-AF_HOST=$(echo "$AIRFLOW__CORE__SQL_ALCHEMY_CONN" | sed -E 's|.*@([^:/]+):([0-9]+)/.*|\1|')
-AF_PORT=$(echo "$AIRFLOW__CORE__SQL_ALCHEMY_CONN" | sed -E 's|.*@[^:/]+:([0-9]+)/.*|\1|')
-AF_DB=$(echo "$AIRFLOW__CORE__SQL_ALCHEMY_CONN" | sed -E 's|.*/([^?]+).*|\1|')
+AF_USER=$(echo "$AIRFLOW__DATABASE__SQL_ALCHEMY_CONN" | sed -E 's|postgresql\+psycopg2://([^:]+):.*|\1|')
+AF_PASS=$(echo "$AIRFLOW__DATABASE__SQL_ALCHEMY_CONN" | sed -E 's|postgresql\+psycopg2://[^:]+:([^@]+)@.*|\1|')
+AF_HOST=$(echo "$AIRFLOW__DATABASE__SQL_ALCHEMY_CONN" | sed -E 's|.*@([^:/]+):([0-9]+)/.*|\1|')
+AF_PORT=$(echo "$AIRFLOW__DATABASE__SQL_ALCHEMY_CONN" | sed -E 's|.*@[^:/]+:([0-9]+)/.*|\1|')
+AF_DB=$(echo "$AIRFLOW__DATABASE__SQL_ALCHEMY_CONN" | sed -E 's|.*/([^?]+).*|\1|')
 
 # transaction_db
 TX_USER=$(echo "$DATABASE_URL" | sed -E 's|postgresql\+psycopg2://([^:]+):.*|\1|')
@@ -49,7 +49,7 @@ EOF
 pgbouncer /etc/pgbouncer/pgbouncer.ini &
 
 # Dynamically modify the URL to PgBouncer
-export AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${AF_USER}:${AF_PASS}@127.0.0.1:6432/airflow_db
+export AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${AF_USER}:${AF_PASS}@127.0.0.1:6432/airflow_db
 
 # Init DB if needed
 airflow db init
