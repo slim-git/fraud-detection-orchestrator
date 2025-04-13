@@ -52,7 +52,8 @@ pgbouncer /etc/pgbouncer/pgbouncer.ini &
 export AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${AF_USER}:${AF_PASS}@127.0.0.1:6432/airflow_db
 
 # Init DB if needed
-airflow db init
+airflow db migrate
+airflow connections create-default-connections
 
 # Create a superuser if it doesn't exist
 airflow users create \
