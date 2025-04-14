@@ -15,11 +15,13 @@ from http.client import (
     INTERNAL_SERVER_ERROR # 500
 )
 
-
 # Load environment variables from .env file
 load_dotenv()
 
 FASTAPI_API_KEY = os.getenv("FASTAPI_API_KEY")
+
+DEFAULT_TRANSACTION_PRODUCTION_ENDPOINT = "https://charlestng-real-time-fraud-detection.hf.space/current-transactions"
+TRANSACTION_PRODUCTION_ENDPOINT = os.getenv("TRANSACTION_PRODUCTION_ENDPOINT", DEFAULT_TRANSACTION_PRODUCTION_ENDPOINT)
 
 @task(task_id="pull_transaction")
 def _pull_transaction(ti, prefix: str = ''):
@@ -27,7 +29,7 @@ def _pull_transaction(ti, prefix: str = ''):
     Pulls a new transaction from the fraud detection service and pushes it to XCom.
     """
     def get_current_transaction():
-        return requests.get("https://charlestng-real-time-fraud-detection.hf.space/current-transactions")
+        return requests.get(DEFAULT_TRANSACTION_PRODUCTION_ENDPOINT)
     
     response = get_current_transaction()
 
