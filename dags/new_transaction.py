@@ -18,10 +18,8 @@ from http.client import (
 # Load environment variables from .env file
 load_dotenv()
 
-FASTAPI_API_KEY = os.getenv("FASTAPI_API_KEY")
-
-DEFAULT_TRANSACTION_PRODUCTION_ENDPOINT = "https://charlestng-real-time-fraud-detection.hf.space/current-transactions"
-TRANSACTION_PRODUCTION_ENDPOINT = os.getenv("TRANSACTION_PRODUCTION_ENDPOINT", DEFAULT_TRANSACTION_PRODUCTION_ENDPOINT)
+DEFAULT_TRANSACTION_PRODUCER_ENDPOINT = "https://charlestng-real-time-fraud-detection.hf.space/current-transactions"
+TRANSACTION_PRODUCER_ENDPOINT = os.getenv("TRANSACTION_PRODUCER_ENDPOINT", DEFAULT_TRANSACTION_PRODUCER_ENDPOINT)
 
 @task(task_id="pull_transaction")
 def _pull_transaction(ti, prefix: str = ''):
@@ -29,7 +27,10 @@ def _pull_transaction(ti, prefix: str = ''):
     Pulls a new transaction from the fraud detection service and pushes it to XCom.
     """
     def get_current_transaction():
-        return requests.get(DEFAULT_TRANSACTION_PRODUCTION_ENDPOINT)
+        if TRANSACTION_PRODUCER_API_KEY := os.getenv("TRANSACTION_PRODUCER_API_KEY"):
+            headers = {'Authorization': TRANSACTION_PRODUCER_API_KEY}
+        
+        return requests.get(url=DEFAULT_TRANSACTION_PRODUCER_ENDPOINT, headers=headers)
     
     response = get_current_transaction()
 
@@ -95,14 +96,16 @@ def _push_transaction(ti, prefix: str = ''):
     
     # Call the fraud detection pipeline with the transaction dictionary
     data = {key: transaction_dict[value] for key, value in params_mapping.items()}
-
+    
+    headers = {'Content-Type': 'application/json'}
+    
+    if TRANSACTION_CONSUMER_API_KEY := os.getenv("TRANSACTION_CONSUMER_API_KEY"):
+        headers['Authorization'] = TRANSACTION_CONSUMER_API_KEY
+    
     api_response = requests.post(
         url='https://slimg-fraud-detection-service-api.hf.space/transaction/process',
         data=json.dumps(data),
-        headers={
-            'Content-Type': 'application/json',
-            'Authorization': FASTAPI_API_KEY
-        },
+        headers=headers,
     )
 
     # Check response status code
