@@ -12,7 +12,7 @@ def _refresh_views():
     This function is called by the DAG to refresh the views.
     It executes the SQL command to refresh the materialized view.
     """
-    with next(get_session()) as session:
+    with get_session() as session:
         list_views = session.execute(text("SELECT matviewname FROM pg_matviews WHERE schemaname = 'public';"))
         
         for view in list_views:
