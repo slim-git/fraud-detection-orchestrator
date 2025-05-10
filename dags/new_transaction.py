@@ -14,9 +14,10 @@ from http.client import (
     TOO_MANY_REQUESTS, # 429
     INTERNAL_SERVER_ERROR # 500
 )
+from pathlib import Path
 
 # Load environment variables from .env file
-load_dotenv()
+load_dotenv(Path(__file__).parent.parent / ".env")
 
 DEFAULT_TRANSACTION_PRODUCER_ENDPOINT = "https://charlestng-real-time-fraud-detection.hf.space/current-transactions"
 TRANSACTION_PRODUCER_ENDPOINT = os.getenv("TRANSACTION_PRODUCER_ENDPOINT", DEFAULT_TRANSACTION_PRODUCER_ENDPOINT)
