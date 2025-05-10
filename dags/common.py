@@ -8,6 +8,8 @@ from datetime import datetime, timedelta
 from typing import Generator
 from contextlib import contextmanager
 
+logger = logging.getLogger(__name__)
+
 # Load environment variables from .env file
 load_dotenv()
 
@@ -63,7 +65,7 @@ def check_db_connection():
     try:
         with get_session() as session:
             session.execute(text("SELECT 1"))
-            logging.info("Database connection is successful.")
+            logger.info("Database connection is successful.")
     except Exception as e:
-        logging.error(f"Database connection failed: {e}")
+        logger.error(f"Database connection failed: {e}")
         raise

@@ -5,6 +5,8 @@ from datetime import datetime, timedelta
 import logging
 from sqlalchemy import text
 
+logger = logging.getLogger(__name__)
+
 @task(task_id="refresh_views")
 def _refresh_views():
     """
@@ -17,7 +19,7 @@ def _refresh_views():
         
         for view in list_views:
             view_name = view[0]
-            logging.info(f"Refreshing materialized view: {view_name}")
+            logger.info(f"Refreshing materialized view: {view_name}")
             session.execute(text(f"REFRESH MATERIALIZED VIEW CONCURRENTLY public.{view_name} WITH DATA;"))
         
             session.commit()

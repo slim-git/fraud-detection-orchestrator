@@ -16,6 +16,8 @@ from http.client import (
 )
 from pathlib import Path
 
+logger = logging.getLogger(__name__)
+
 # Load environment variables from .env file
 load_dotenv(Path(__file__).parent.parent / ".env")
 
@@ -39,7 +41,7 @@ def _pull_transaction(ti, prefix: str = ''):
     # If status code is 429 or 500, wait for a few seconds and retry
     if response.status_code in [TOO_MANY_REQUESTS, INTERNAL_SERVER_ERROR]:
         waiting_time = 15
-        logging.warning(f"Rate limit exceeded. Retrying in {waiting_time} seconds...")
+        logger.warning(f"Rate limit exceeded. Retrying in {waiting_time} seconds...")
         time.sleep(waiting_time)
         response = get_current_transaction()
 
@@ -55,7 +57,7 @@ def _pull_transaction(ti, prefix: str = ''):
     # Push the transaction dictionary to XCom
     ti.xcom_push(key=f"{prefix}_transaction_dict", value=transaction_dict)
     
-    logging.info(f"Fetched data: {transaction_dict}")
+    logger.info(f"Fetched data: {transaction_dict}")
 
 @task(task_id="push_transaction")
 def _push_transaction(ti, prefix: str = ''):
@@ -93,7 +95,7 @@ def _push_transaction(ti, prefix: str = ''):
 
     # Check if the transaction dictionary is empty
     if not transaction_dict:
-        logging.error("No transaction data found.")
+        logger.error("No transaction data found.")
         return
     
     # Call the fraud detection pipeline with the transaction dictionary
@@ -116,7 +118,7 @@ def _push_transaction(ti, prefix: str = ''):
     # Load the JSON data
     data = api_response.json()
 
-    logging.info(f"Fraud detection response: {data}")
+    logger.info(f"Fraud detection response: {data}")
 
 # Copy default_args from the original code
 dag_args = default_args.copy()
