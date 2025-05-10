@@ -20,6 +20,7 @@ load_dotenv()
 
 DEFAULT_TRANSACTION_PRODUCER_ENDPOINT = "https://charlestng-real-time-fraud-detection.hf.space/current-transactions"
 TRANSACTION_PRODUCER_ENDPOINT = os.getenv("TRANSACTION_PRODUCER_ENDPOINT", DEFAULT_TRANSACTION_PRODUCER_ENDPOINT)
+TRANSACTION_CONSUMER_ENDPOINT = os.getenv("TRANSACTION_CONSUMER_ENDPOINT")
 
 @task(task_id="pull_transaction")
 def _pull_transaction(ti, prefix: str = ''):
@@ -103,7 +104,7 @@ def _push_transaction(ti, prefix: str = ''):
         headers['Authorization'] = TRANSACTION_CONSUMER_API_KEY
     
     api_response = requests.post(
-        url='https://slimg-fraud-detection-service-api.hf.space/transaction/process',
+        url=TRANSACTION_CONSUMER_ENDPOINT,
         data=json.dumps(data),
         headers=headers,
     )
