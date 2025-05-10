@@ -30,7 +30,7 @@ def _pull_transaction(ti, prefix: str = ''):
         if TRANSACTION_PRODUCER_API_KEY := os.getenv("TRANSACTION_PRODUCER_API_KEY"):
             headers = {'Authorization': TRANSACTION_PRODUCER_API_KEY}
         
-        return requests.get(url=DEFAULT_TRANSACTION_PRODUCER_ENDPOINT, headers=headers)
+        return requests.get(url=TRANSACTION_PRODUCER_ENDPOINT, headers=headers)
     
     response = get_current_transaction()
 
